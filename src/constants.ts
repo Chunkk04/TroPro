@@ -82,8 +82,9 @@ export const listings: Listing[] = [
 ];
 
 export const areas = [
-  { name: 'Quận 1', count: '1,240', image: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?auto=format&fit=crop&q=80&w=800' },
-  { name: 'Quận 3', count: '850', image: 'https://images.unsplash.com/photo-1555400038-63f5ba517a47?auto=format&fit=crop&q=80&w=800' },
-  { name: 'Bình Thạnh', count: '2,100', image: 'https://images.unsplash.com/photo-1559592413-7cee85affb4b?auto=format&fit=crop&q=80&w=800' },
-  { name: 'Thủ Đức', count: '3,450', image: 'https://images.unsplash.com/photo-1583417267826-aebc4d1542a1?auto=format&fit=crop&q=80&w=800' }
+  { name: 'Hải Châu', count: '1,240', image: 'https://images.unsplash.com/photo-1559592413-7cee85affb4b?auto=format&fit=crop&q=80&w=800' },
+  { name: 'Thanh Khê', count: '850', image: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?auto=format&fit=crop&q=80&w=800' },
+  { name: 'Sơn Trà', count: '2,100', image: 'https://images.unsplash.com/photo-1555400038-63f5ba517a47?auto=format&fit=crop&q=80&w=800' },
+  { name: 'Ngũ Hành Sơn', count: '3,450', image: 'https://images.unsplash.com/photo-1583417267826-aebc4d1542a1?auto=format&fit=crop&q=80&w=800' },
+  { name: 'Liên Chiểu', count: '1,800', image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=800' }
 ];

@@ -510,10 +510,10 @@ export const ManagePage = ({ onNavigate, user, onLogout }: ManagePageProps) => {
               <div className="flex flex-wrap items-center justify-between gap-6">
                 <div className="flex gap-2 p-1.5 bg-slate-100 rounded-2xl">
                   {[
-                    { id: 'all', label: 'Tất cả', count: 24 },
-                    { id: 'empty', label: 'Trống', count: 5 },
-                    { id: 'occupied', label: 'Đang thuê', count: 16 },
-                    { id: 'repairing', label: 'Đang sửa', count: 3 },
+                    { id: 'all', label: 'Tất cả', count: roomsData.length },
+                    { id: 'empty', label: 'Trống', count: roomsData.filter(r => r.status === 'empty').length },
+                    { id: 'occupied', label: 'Đang thuê', count: roomsData.filter(r => r.status === 'occupied').length },
+                    { id: 'repairing', label: 'Đang sửa', count: roomsData.filter(r => r.status === 'repairing').length },
                   ].map((filter) => (
                     <button 
                       key={filter.id}
@@ -809,9 +809,15 @@ export const ManagePage = ({ onNavigate, user, onLogout }: ManagePageProps) => {
               {/* Statistics Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[
-                  { label: 'Đang hiệu lực', value: '24', sub: '+2 hợp đồng mới', icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-100' },
-                  { label: 'Chờ ký', value: '5', sub: 'Cần xử lý trong tuần', icon: FileClock, color: 'text-orange-600', bg: 'bg-orange-100' },
-                  { label: 'Sắp hết hạn', value: '3', sub: 'Dưới 30 ngày', icon: AlertCircle, color: 'text-red-600', bg: 'bg-red-100' },
+                  { label: 'Đang hiệu lực', value: contractsData.filter(c => c.status === 'active').length.toString(), sub: '+0 hợp đồng mới', icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-100' },
+                  { label: 'Chờ ký', value: contractsData.filter(c => c.status === 'pending').length.toString(), sub: 'Cần xử lý trong tuần', icon: FileClock, color: 'text-orange-600', bg: 'bg-orange-100' },
+                  { label: 'Sắp hết hạn', value: contractsData.filter(c => {
+                    const endDate = new Date(c.end_date);
+                    const today = new Date();
+                    const diffTime = endDate.getTime() - today.getTime();
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    return diffDays > 0 && diffDays <= 30;
+                  }).length.toString(), sub: 'Dưới 30 ngày', icon: AlertCircle, color: 'text-red-600', bg: 'bg-red-100' },
                 ].map((stat, i) => (
                   <div key={i} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
@@ -917,7 +923,7 @@ export const ManagePage = ({ onNavigate, user, onLogout }: ManagePageProps) => {
                 {/* Pagination */}
                 <div className="p-6 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                    Hiển thị 1-{filteredContracts.length} trên tổng số 32 hợp đồng
+                    Hiển thị 1-{filteredContracts.length} trên tổng số {contractsData.length} hợp đồng
                   </span>
                   <div className="flex items-center gap-2">
                     <button className="p-2 border border-slate-200 rounded-xl text-slate-300 hover:bg-slate-50 disabled:opacity-50 transition-all" disabled>
@@ -1286,11 +1292,11 @@ export const ManagePage = ({ onNavigate, user, onLogout }: ManagePageProps) => {
                   <div className="flex flex-wrap justify-center md:justify-start gap-4">
                     <div className="flex items-center gap-2 text-xs font-bold text-slate-400 bg-slate-50 px-3 py-2 rounded-xl">
                       <HomeIcon className="w-4 h-4" />
-                      24 Phòng đang quản lý
+                      {roomsData.length} Phòng đang quản lý
                     </div>
                     <div className="flex items-center gap-2 text-xs font-bold text-slate-400 bg-slate-50 px-3 py-2 rounded-xl">
                       <Users className="w-4 h-4" />
-                      42 Người đang thuê
+                      {tenantsData.length} Người đang thuê
                     </div>
                   </div>
                 </div>
