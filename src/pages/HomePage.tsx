@@ -12,11 +12,22 @@ import {
   Phone,
   Facebook,
   Instagram,
-  Twitter
+  Twitter,
+  User,
+  LogOut
 } from 'lucide-react';
 import { listings, areas } from '../constants';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 
-export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
+export const HomePage = ({ 
+  onNavigate, 
+  user, 
+  onLogout 
+}: { 
+  onNavigate: (page: string) => void,
+  user: SupabaseUser | null,
+  onLogout: () => void
+}) => {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Navbar */}
@@ -30,23 +41,54 @@ export const HomePage = ({ onNavigate }: { onNavigate: (page: string) => void })
               <h1 className="text-xl font-bold tracking-tight text-primary font-display">Trọ Pro</h1>
             </div>
             <nav className="hidden md:flex items-center gap-8">
-              <a className="text-sm font-semibold hover:text-primary transition-colors" href="#">Trang chủ</a>
-              <a className="text-sm font-semibold hover:text-primary transition-colors" href="#">Cửa hàng</a>
+              <a className="text-sm font-semibold hover:text-primary transition-colors" href="#" onClick={(e) => { e.preventDefault(); onNavigate('home'); }}>Trang chủ</a>
+              <a className="text-sm font-semibold hover:text-primary transition-colors" href="#" onClick={(e) => { e.preventDefault(); onNavigate('store'); }}>Cửa hàng</a>
               <a className="text-sm font-semibold hover:text-primary transition-colors" href="#">Liên hệ</a>
+              {user?.user_metadata?.role === 'landlord' && (
+                <a 
+                  href="#"
+                  onClick={(e) => { e.preventDefault(); onNavigate('manage'); }}
+                  className="text-sm font-semibold hover:text-primary transition-colors"
+                >
+                  Quản lý
+                </a>
+              )}
             </nav>
             <div className="flex items-center gap-3">
-              <button 
-                onClick={() => onNavigate('login')}
-                className="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-primary transition-colors"
-              >
-                Đăng nhập
-              </button>
-              <button 
-                onClick={() => onNavigate('register')}
-                className="bg-primary text-white text-sm font-bold px-5 py-2 rounded-lg hover:bg-primary-hover transition-all shadow-md"
-              >
-                Đăng ký
-              </button>
+              {user ? (
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-full border border-slate-100">
+                    <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                      <User className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm font-semibold text-slate-700 max-w-[120px] truncate">
+                      {user.user_metadata?.full_name || user.email}
+                    </span>
+                  </div>
+                  <button 
+                    onClick={onLogout}
+                    className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                    title="Đăng xuất"
+                  >
+                    <LogOut className="w-5 h-5" />
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => onNavigate('login')}
+                    className="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-primary transition-colors"
+                  >
+                    Đăng nhập
+                  </button>
+                  <button 
+                    onClick={() => onNavigate('register')}
+                    className="bg-primary text-white text-sm font-bold px-5 py-2 rounded-lg hover:bg-primary-hover transition-all shadow-md"
+                  >
+                    Đăng ký
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

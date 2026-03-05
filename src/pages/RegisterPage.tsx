@@ -9,13 +9,56 @@ import {
   ArrowRight, 
   Home as HomeIcon, 
   UserCircle,
-  ShieldCheck,
   Smartphone
 } from 'lucide-react';
 import { AuthIllustration } from '../components/AuthIllustration';
+import { supabase } from '../lib/supabase';
 
 export const RegisterPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   const [role, setRole] = useState<'landlord' | 'tenant'>('landlord');
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    if (password !== confirmPassword) {
+      setError('Mật khẩu xác nhận không khớp');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            phone: phone,
+            role: role,
+          }
+        }
+      });
+
+      if (signUpError) throw signUpError;
+      
+      setSuccess(true);
+      setTimeout(() => onNavigate('login'), 3000);
+    } catch (err: any) {
+      setError(err.message || 'Đã có lỗi xảy ra khi đăng ký');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
@@ -40,7 +83,19 @@ export const RegisterPage = ({ onNavigate }: { onNavigate: (page: string) => voi
             <p className="text-slate-500 text-base font-normal">Vui lòng điền thông tin để bắt đầu quản lý phòng trọ của bạn</p>
           </div>
 
-          <form className="flex flex-col gap-5" onSubmit={(e) => e.preventDefault()}>
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm font-medium">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-100 text-green-600 rounded-xl text-sm font-medium">
+              Đăng ký thành công! Đang chuyển hướng đến trang đăng nhập...
+            </div>
+          )}
+
+          <form className="flex flex-col gap-5" onSubmit={handleRegister}>
             <div className="flex flex-col gap-2">
               <label className="text-slate-700 text-sm font-semibold">Họ và tên</label>
               <div className="relative">
@@ -49,6 +104,9 @@ export const RegisterPage = ({ onNavigate }: { onNavigate: (page: string) => voi
                   className="flex w-full rounded-lg border border-slate-300 bg-white h-12 pl-10 pr-4 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" 
                   placeholder="Nhập họ và tên của bạn" 
                   type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
                 />
               </div>
             </div>
@@ -62,6 +120,9 @@ export const RegisterPage = ({ onNavigate }: { onNavigate: (page: string) => voi
                     className="flex w-full rounded-lg border border-slate-300 bg-white h-12 pl-10 pr-4 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" 
                     placeholder="example@gmail.com" 
                     type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
                   />
                 </div>
               </div>
@@ -73,6 +134,9 @@ export const RegisterPage = ({ onNavigate }: { onNavigate: (page: string) => voi
                     className="flex w-full rounded-lg border border-slate-300 bg-white h-12 pl-10 pr-4 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" 
                     placeholder="0901 234 567" 
                     type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    required
                   />
                 </div>
               </div>
@@ -108,6 +172,9 @@ export const RegisterPage = ({ onNavigate }: { onNavigate: (page: string) => voi
                   className="flex w-full rounded-lg border border-slate-300 bg-white h-12 pl-10 pr-4 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" 
                   placeholder="••••••••" 
                   type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
               </div>
             </div>
@@ -120,14 +187,20 @@ export const RegisterPage = ({ onNavigate }: { onNavigate: (page: string) => voi
                   className="flex w-full rounded-lg border border-slate-300 bg-white h-12 pl-10 pr-4 text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" 
                   placeholder="••••••••" 
                   type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
                 />
               </div>
             </div>
 
             <div className="mt-4">
-              <button className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-4 px-4 rounded-xl transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2 group">
-                <span>Đăng ký ngay</span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <button 
+                disabled={loading || success}
+                className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-4 px-4 rounded-xl transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                <span>{loading ? 'Đang xử lý...' : 'Đăng ký ngay'}</span>
+                {!loading && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
               </button>
             </div>
 
@@ -135,6 +208,7 @@ export const RegisterPage = ({ onNavigate }: { onNavigate: (page: string) => voi
               <p className="text-slate-500 text-sm">
                 Đã có tài khoản? 
                 <button 
+                  type="button"
                   onClick={() => onNavigate('login')}
                   className="text-secondary font-bold hover:underline ml-1"
                 >

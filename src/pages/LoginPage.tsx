@@ -7,14 +7,37 @@ import {
   Eye, 
   EyeOff, 
   ArrowRight, 
-  ArrowLeft,
-  ShieldCheck,
   Smartphone
 } from 'lucide-react';
 import { AuthIllustration } from '../components/AuthIllustration';
+import { supabase } from '../lib/supabase';
 
 export const LoginPage = ({ onNavigate }: { onNavigate: (page: string) => void }) => {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+      onNavigate('home');
+    } catch (err: any) {
+      setError(err.message || 'Đã có lỗi xảy ra khi đăng nhập');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
@@ -39,7 +62,13 @@ export const LoginPage = ({ onNavigate }: { onNavigate: (page: string) => void }
             <p className="text-slate-500 text-lg font-medium">Kết nối, chia sẻ, và tìm kiếm dễ dàng</p>
           </div>
 
-          <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl text-sm font-medium">
+              {error}
+            </div>
+          )}
+
+          <form className="space-y-6" onSubmit={handleLogin}>
             <div className="flex flex-col gap-2">
               <label className="text-slate-700 text-sm font-bold ml-1">Email của bạn</label>
               <div className="relative">
@@ -48,6 +77,9 @@ export const LoginPage = ({ onNavigate }: { onNavigate: (page: string) => void }
                   className="flex w-full rounded-xl border-2 border-slate-100 bg-slate-50 h-14 pl-12 pr-4 text-slate-900 focus:border-primary focus:ring-0 placeholder:text-slate-400 transition-all outline-none" 
                   placeholder="name@example.com" 
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
               </div>
             </div>
@@ -56,6 +88,7 @@ export const LoginPage = ({ onNavigate }: { onNavigate: (page: string) => void }
               <div className="flex justify-between items-center">
                 <label className="text-slate-700 text-sm font-bold ml-1">Mật khẩu</label>
                 <button 
+                  type="button"
                   onClick={() => onNavigate('forgot-password')}
                   className="text-primary text-sm font-bold hover:text-orange-600 transition-colors"
                 >
@@ -68,6 +101,9 @@ export const LoginPage = ({ onNavigate }: { onNavigate: (page: string) => void }
                   className="flex w-full rounded-xl border-2 border-slate-100 bg-slate-50 h-14 pl-12 pr-12 text-slate-900 focus:border-primary focus:ring-0 placeholder:text-slate-400 transition-all outline-none" 
                   placeholder="••••••••" 
                   type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
                 <button 
                   type="button"
@@ -88,9 +124,12 @@ export const LoginPage = ({ onNavigate }: { onNavigate: (page: string) => void }
               <label className="text-sm font-medium text-slate-600 cursor-pointer select-none" htmlFor="remember">Ghi nhớ đăng nhập</label>
             </div>
 
-            <button className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-4 px-4 rounded-xl transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2 group">
-              <span>Đăng nhập ngay</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <button 
+              disabled={loading}
+              className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-4 px-4 rounded-xl transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              <span>{loading ? 'Đang đăng nhập...' : 'Đăng nhập ngay'}</span>
+              {!loading && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
             </button>
           </form>
 
